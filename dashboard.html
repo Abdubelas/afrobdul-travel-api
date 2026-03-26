@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Afrobdul Travel Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+            padding: 24px 48px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-left h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+        .header-left h1 span { color: #ff6b35; }
+        .header-left p { color: #666; font-size: 0.85rem; margin-top: 2px; }
+        .instagram-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;
+            text-decoration: none; color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding: 32px 48px;
+        }
+        .stat-card {
+            background: #141414;
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid #222;
+            transition: border-color 0.2s;
+        }
+        .stat-card:hover { border-color: #ff6b35; }
+        .stat-card .label { color: #555; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .stat-card .value { font-size: 2.8rem; font-weight: 700; color: #ff6b35; line-height: 1; }
+        .stat-card .countries-list { font-size: 0.9rem; color: #aaa; line-height: 1.6; margin-top: 8px; }
+
+        .trips-section { padding: 0 48px 48px; }
+        .trips-section h2 { font-size: 1.1rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+
+        .trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+        .trip-card {
+            background: #141414;
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid #222;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .trip-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b35, #ff9f1c);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .trip-card:hover { border-color: #333; transform: translateY(-3px); }
+        .trip-card:hover::before { opacity: 1; }
+
+        .trip-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .trip-card h3 { font-size: 1.05rem; font-weight: 600; }
+        .year-badge { background: #ff6b35; color: #000; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .location { color: #666; font-size: 0.82rem; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+        .notes { color: #888; font-size: 0.83rem; line-height: 1.5; margin-bottom: 12px; }
+        .stars { font-size: 0.85rem; }
+
+        .loading { text-align: center; padding: 80px; color: #444; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div>
+                <h1>🌍 <span>Afrobdul</span> Travel Dashboard</h1>
+                <p>Real trips. Real data. Powered by my own API.</p>
+            </div>
+        </div>
+        <a class="instagram-badge" href="https://instagram.com/afrobdul" target="_blank">
+            📸 @afrobdul
+        </a>
+    </header>
+
+    <div class="stats" id="stats">
+        <div class="loading">Loading...</div>
+    </div>
+
+    <div class="trips-section">
+        <h2>All Trips</h2>
+        <div class="trip-grid" id="trip-grid">
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:8000';
+
+        async function loadStats() {
+            const res = await fetch(`${API}/stats`);
+            const data = await res.json();
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="label">Total Trips</div>
+                    <div class="value">${data.total_trips}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Countries</div>
+                    <div class="countries-list">${data.countries.map(c => `<span style="display:inline-block; background:#1f1f1f; border:1px solid #333; padding:3px 10px; border-radius:20px; margin:3px 2px; font-size:0.78rem; color:#ccc;">${c}</span>`).join('')}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Average Rating</div>
+                    <div class="value">${data.average_rating.toFixed(1)}⭐</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Countries</div>
+                    <div class="countries-list">${data.countries.join(' · ')}</div>
+                </div>
+            `;
+        }
+
+        async function loadTrips() {
+            const res = await fetch(`${API}/trips`);
+            const data = await res.json();
+            document.getElementById('trip-grid').innerHTML = data.trips.map(trip => `
+                <div class="trip-card">
+                    <div class="trip-card-header">
+                        <h3>${trip.city}</h3>
+                        <span class="year-badge">${trip.year}</span>
+                    </div>
+                    <div class="location">📍 ${trip.country}</div>
+                    <div class="notes">${trip.notes}</div>
+                    <div class="stars">${'⭐'.repeat(trip.rating)}</div>
+                </div>
+            `).join('');
+        }
+
+        loadStats();
+        loadTrips();
+    </script>
+</body>
+</html>

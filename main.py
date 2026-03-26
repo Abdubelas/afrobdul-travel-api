@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from sqlalchemy import create_engine, Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -7,6 +9,13 @@ import time
 
 app = FastAPI(title="Afrobdul Travel API", version="1.0.0",
               description="🌍 Tracking every trip, one endpoint at a time.")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./travel.db")
 
@@ -64,6 +73,10 @@ def seed_data():
     db.close()
 
 seed_data()
+
+@app.get("/dashboard", include_in_schema=False)
+def dashboard():
+    return FileResponse("/app/dashboard.html")
 
 @app.get("/")
 def root():
