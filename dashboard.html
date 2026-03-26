@@ -8,7 +8,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
-
         header {
             background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
             padding: 24px 48px;
@@ -27,7 +26,6 @@
             padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;
             text-decoration: none; color: white;
         }
-
         .stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -44,11 +42,10 @@
         .stat-card:hover { border-color: #ff6b35; }
         .stat-card .label { color: #555; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .stat-card .value { font-size: 2.8rem; font-weight: 700; color: #ff6b35; line-height: 1; }
-        .stat-card .countries-list { font-size: 0.9rem; color: #aaa; line-height: 1.6; margin-top: 8px; }
-
+        .stat-card .countries-list { margin-top: 8px; }
+        .country-pill { display: inline-block; background: #1f1f1f; border: 1px solid #333; padding: 3px 10px; border-radius: 20px; margin: 3px 2px; font-size: 0.78rem; color: #ccc; }
         .trips-section { padding: 0 48px 48px; }
         .trips-section h2 { font-size: 1.1rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
-
         .trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
         .trip-card {
             background: #141414;
@@ -70,14 +67,12 @@
         }
         .trip-card:hover { border-color: #333; transform: translateY(-3px); }
         .trip-card:hover::before { opacity: 1; }
-
         .trip-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         .trip-card h3 { font-size: 1.05rem; font-weight: 600; }
         .year-badge { background: #ff6b35; color: #000; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .location { color: #666; font-size: 0.82rem; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
         .notes { color: #888; font-size: 0.83rem; line-height: 1.5; margin-bottom: 12px; }
         .stars { font-size: 0.85rem; }
-
         .loading { text-align: center; padding: 80px; color: #444; font-size: 0.9rem; }
     </style>
 </head>
@@ -100,8 +95,7 @@
 
     <div class="trips-section">
         <h2>All Trips</h2>
-        <div class="trip-grid" id="trip-grid">
-        </div>
+        <div class="trip-grid" id="trip-grid"></div>
     </div>
 
     <script>
@@ -110,14 +104,15 @@
         async function loadStats() {
             const res = await fetch(`${API}/stats`);
             const data = await res.json();
+            const pills = data.countries.map(c => `<span class="country-pill">${c}</span>`).join('');
             document.getElementById('stats').innerHTML = `
                 <div class="stat-card">
                     <div class="label">Total Trips</div>
                     <div class="value">${data.total_trips}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="label">Countries</div>
-                    <div class="countries-list">${data.countries.map(c => `<span style="display:inline-block; background:#1f1f1f; border:1px solid #333; padding:3px 10px; border-radius:20px; margin:3px 2px; font-size:0.78rem; color:#ccc;">${c}</span>`).join('')}</div>
+                    <div class="label">Countries Visited</div>
+                    <div class="value">${data.countries_visited}</div>
                 </div>
                 <div class="stat-card">
                     <div class="label">Average Rating</div>
@@ -125,7 +120,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="label">Countries</div>
-                    <div class="countries-list">${data.countries.join(' · ')}</div>
+                    <div class="countries-list">${pills}</div>
                 </div>
             `;
         }
